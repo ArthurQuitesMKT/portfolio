@@ -1,0 +1,12 @@
+# Robots.txt - Arthur Quites · Direção de Arte & Branding Corporativo
+# Website: https://arthurquites.com.br/
+
+User-agent: *
+Allow: /
+Allow: /dist/
+Allow: /assets/
+Allow: /js/
+Allow: /curriculo.html
+
+# Sitemap oficial
+Sitemap: https://arthurquites.com.br/sitemap.xml

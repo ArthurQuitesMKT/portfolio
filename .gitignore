@@ -1,0 +1,13 @@
+# Ignorar backups, rascunhos e arquivos temporários
+*_backup*.html
+*backup*
+*rascunho*
+test_*.html
+*.zip
+_rascunho_salvo/
+dist/styles.min.css.map
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+node_modules/
