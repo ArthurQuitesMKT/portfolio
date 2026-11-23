@@ -271,7 +271,7 @@
       });
     }
 
-    // Clique nos cards: Clicar em card vizinho inativo centraliza o card
+    // Clique nos cards: Clicar em card vizinho inativo centraliza o card; clicar no ativo abre o Lightbox
     allItems.forEach((item) => {
       item.addEventListener('click', (e) => {
         if (dragDistance > 8 || e.target.closest('[data-lightbox-trigger]')) return;
@@ -284,8 +284,13 @@
           e.stopPropagation();
           goTo(vIdx);
           resetAutoplay();
+        } else {
+          // Se o card já está centralizado/ativo, clicar na imagem abre o Lightbox diretamente
+          const trigger = item.querySelector('[data-lightbox-trigger]');
+          if (trigger) {
+            trigger.click();
+          }
         }
-        // Se já está ativo, o card permanece em foco sem abrir modal indesejado
       });
     });
 

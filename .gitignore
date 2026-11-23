@@ -2,9 +2,12 @@
 *_backup*.html
 *backup*
 *rascunho*
+*_laranja*.html
 test_*.html
 *.zip
 _rascunho_salvo/
+js/smooth-scroll-slider.js
+js/*backup*
 dist/styles.min.css.map
 .vscode/
 .idea/

@@ -419,7 +419,7 @@
             </a>
             <button onclick="copiarEmailCurriculo()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white transition-colors cursor-pointer" title="Clique para copiar">
               <i data-lucide="mail" class="w-3.5 h-3.5 text-orange-400"></i>
-              <span id="curriculo-email-txt">arthurquites2@gmail.com</span>
+              <span id="curriculo-email-txt">arthurquites2&#64;gmail&#46;com</span>
             </button>
             <a href="index.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white transition-colors">
               <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-orange-400"></i>
@@ -749,7 +749,9 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+      }
       document.addEventListener('mousemove', (e) => {
         const card = e.target.closest('.print-card');
         if (!card) return;
@@ -759,17 +761,44 @@
       }, { passive: true });
     });
 
+    function copyTextToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      }
+      return new Promise((resolve, reject) => {
+        try {
+          const textArea = document.createElement('textarea');
+          textArea.value = text;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-999999px';
+          textArea.style.top = '-999999px';
+          textArea.setAttribute('readonly', '');
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textArea);
+          if (successful) resolve();
+          else reject(new Error('execCommand copy failed'));
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+
     function copiarEmailCurriculo() {
       const email = 'arthurquites2@gmail.com';
-      navigator.clipboard.writeText(email).then(() => {
+      copyTextToClipboard(email).then(() => {
         const toast = document.getElementById('toast-curriculo');
         if (toast) {
           toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-          setTimeout(() => {
+          clearTimeout(toast._timer);
+          toast._timer = setTimeout(() => {
             toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
           }, 3000);
         }
       }).catch(err => {
+        console.warn('Falha na cópia automática:', err);
         prompt('Copie o e-mail abaixo:', email);
       });
     }

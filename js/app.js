@@ -113,6 +113,41 @@ function initCasesCarousel() {
 /* ==========================================================================
    3. Modal Lightbox com Navegação Circular (Loop Infinito) e Estudo Estratégico
    ========================================================================== */
+const CATEGORY_DISPLAY_MAP = {
+  campanhas: 'Campanhas',
+  cases: 'Cases',
+  institucionais: 'Institucional',
+  anuncios: 'Anúncios'
+};
+
+const CASE_STUDIES_DATA = {
+  'campanhas_21-de-stembro.webp': {
+    desafio: 'Humanizar a presença digital da construtora conectando sustentabilidade cívica ao posicionamento da marca.',
+    solucao: 'Direção de arte minimalista com tipografia clean, textura orgânica e paleta de tons terrosos alinhada ao Brand Book.',
+    impacto: 'Taxa de engajamento 4.2x acima da média do setor com mais de 35% de novos compartilhamentos espontâneos.'
+  },
+  'campanhas_Aniversario_JoaoPessoa.webp': {
+    desafio: 'Celebrar a expansão das obras para a capital paraibana gerando conexão institucional autêntica com o público regional.',
+    solucao: 'Fotografia aérea em ângulo dourado com tratamento cinematográfico e grid tipográfico integrado.',
+    impacto: 'Pico de 12.400 impressões orgânicas únicas na região metropolitana de João Pessoa.'
+  },
+  'campanhas_diadamulhereng.webp': {
+    desafio: 'Destacar a liderança técnica feminina nos canteiros de obras fugindo de clichês visuais genéricos.',
+    solucao: 'Composição fotográfica autoral valorizando EPIs homologados, postura executiva e tipografia de alto impacto.',
+    impacto: 'Top 4 postagem de maior engajamento orgânico do ano no ecossistema digital da construtora.'
+  },
+  'cases_OBRATJAM_01.webp': {
+    desafio: 'Transmitir solidez, conformidade técnica e transparência em obra judiciária de alta complexidade.',
+    solucao: 'Fotografia arquitetônica de ângulo baixo valorizando as linhas estruturais e selos técnicos de engenharia.',
+    impacto: 'Apresentado em relatório institucional C-Level e aprovado por comissão pública de fiscalização.'
+  },
+  'institucionais_basesolida.webp': {
+    desafio: 'Diferenciar a empresa da concorrência ressaltando a engenharia de fundações e a confiabilidade de longo prazo.',
+    solucao: 'Contraste cromático grafite/laranja industrial destacando armaduras de aço e concreto estrutural.',
+    impacto: '+490% de impressões no LinkedIn entre diretores de novos negócios e gestores de licitações.'
+  }
+};
+
 function initLightbox() {
   const modal = document.getElementById('lightbox-modal');
   const backdrop = document.getElementById('lightbox-backdrop');
@@ -133,41 +168,6 @@ function initLightbox() {
   let lastTriggerEl = null;
   let activeCardsList = [];
   let currentCardIndex = 0;
-
-  const categoryDisplayMap = {
-    campanhas: 'Campanhas',
-    cases: 'Cases',
-    institucionais: 'Institucional',
-    anuncios: 'Anúncios'
-  };
-
-  const caseStudies = {
-    'campanhas_21-de-stembro.webp': {
-      desafio: 'Humanizar a presença digital da construtora conectando sustentabilidade cívica ao posicionamento da marca.',
-      solucao: 'Direção de arte minimalista com tipografia clean, textura orgânica e paleta de tons terrosos alinhada ao Brand Book.',
-      impacto: 'Taxa de engajamento 4.2x acima da média do setor com mais de 35% de novos compartilhamentos espontâneos.'
-    },
-    'campanhas_Aniversario_JoaoPessoa.webp': {
-      desafio: 'Celebrar a expansão das obras para a capital paraibana gerando conexão institucional autêntica com o público regional.',
-      solucao: 'Fotografia aérea em ângulo dourado com tratamento cinematográfico e grid tipográfico integrado.',
-      impacto: 'Pico de 12.400 impressões orgânicas únicas na região metropolitana de João Pessoa.'
-    },
-    'campanhas_diadamulhereng.webp': {
-      desafio: 'Destacar a liderança técnica feminina nos canteiros de obras fugindo de clichês visuais genéricos.',
-      solucao: 'Composição fotográfica autoral valorizando EPIs homologados, postura executiva e tipografia de alto impacto.',
-      impacto: 'Top 4 postagem de maior engajamento orgânico do ano no ecossistema digital da construtora.'
-    },
-    'cases_OBRATJAM_01.webp': {
-      desafio: 'Transmitir solidez, conformidade técnica e transparência em obra judiciária de alta complexidade.',
-      solucao: 'Fotografia arquitetônica de ângulo baixo valorizando as linhas estruturais e selos técnicos de engenharia.',
-      impacto: 'Apresentado em relatório institucional C-Level e aprovado por comissão pública de fiscalização.'
-    },
-    'institucionais_basesolida.webp': {
-      desafio: 'Diferenciar a empresa da concorrência ressaltando a engenharia de fundações e a confiabilidade de longo prazo.',
-      solucao: 'Contraste cromático grafite/laranja industrial destacando armaduras de aço e concreto estrutural.',
-      impacto: '+490% de impressões no LinkedIn entre diretores de novos negócios e gestores de licitações.'
-    }
-  };
 
   function getFallbackStudy(category, title, description) {
     const catLower = (category || '').toLowerCase();
@@ -221,7 +221,7 @@ function initLightbox() {
       (card.querySelector('h3') ? card.querySelector('h3').textContent.trim() : 'Visualização do Projeto');
     const rawCat = (btn && btn.getAttribute('data-cat')) ||
       (card.getAttribute('data-category')) || '';
-    const category = categoryDisplayMap[rawCat] || rawCat;
+    const category = CATEGORY_DISPLAY_MAP[rawCat] || rawCat;
     const description = (btn && btn.getAttribute('data-desc')) ||
       (card.querySelector('p') ? card.querySelector('p').textContent.trim() : '');
 
@@ -236,7 +236,7 @@ function initLightbox() {
     }
 
     const filename = imgSrc.split('/').pop();
-    const study = caseStudies[filename] || getFallbackStudy(category, title, description);
+    const study = CASE_STUDIES_DATA[filename] || getFallbackStudy(category, title, description);
 
     if (study && studyContainer) {
       studyContainer.classList.remove('hidden');
