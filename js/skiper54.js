@@ -9,16 +9,7 @@
 
   const escapeHTML = (window.PortfolioUtils && window.PortfolioUtils.escapeHTML)
     ? window.PortfolioUtils.escapeHTML
-    : function (str) {
-        if (!str || typeof str !== 'string') return '';
-        return str.replace(/[&<>'"]/g, tag => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          "'": '&#39;',
-          '"': '&quot;'
-        }[tag] || tag));
-      };
+    : (str => (typeof str === 'string' ? str.replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c] || c)) : ''));
 
   /* ==========================================================================
      1. Módulo de Extração e Sanitização de Dados dos Projetos
@@ -244,9 +235,16 @@
       });
     }
 
+    let isAnimating = false;
     function goTo(index, animate = true) {
       const visible = getVisibleItems();
       if (visible.length === 0) return;
+
+      if (animate && isAnimating) return;
+      if (animate) {
+        isAnimating = true;
+        setTimeout(() => { isAnimating = false; }, 320);
+      }
 
       if (index < 0) {
         index = visible.length - 1;

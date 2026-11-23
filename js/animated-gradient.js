@@ -232,15 +232,30 @@ void main() {
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderSource);
     gl.compileShader(vertexShader);
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+      console.warn("Falha na compilação do Vertex Shader:", gl.getShaderInfoLog(vertexShader));
+      container.style.backgroundImage = 'radial-gradient(ellipse at 50% 0%, rgba(255, 107, 0, 0.35) 0%, transparent 70%)';
+      return null;
+    }
 
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, FRAGMENT_SHADER);
     gl.compileShader(fragmentShader);
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+      console.warn("Falha na compilação do Fragment Shader:", gl.getShaderInfoLog(fragmentShader));
+      container.style.backgroundImage = 'radial-gradient(ellipse at 50% 0%, rgba(255, 107, 0, 0.35) 0%, transparent 70%)';
+      return null;
+    }
 
     const program = gl.createProgram();
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.warn("Falha no link do programa WebGL:", gl.getProgramInfoLog(program));
+      container.style.backgroundImage = 'radial-gradient(ellipse at 50% 0%, rgba(255, 107, 0, 0.35) 0%, transparent 70%)';
+      return null;
+    }
     gl.useProgram(program);
 
     const positionBuffer = gl.createBuffer();

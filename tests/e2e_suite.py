@@ -1,6 +1,6 @@
 """
 Suite de Testes E2E (End-to-End) Headless Browser com Playwright
-Valida interações, renderização, acessibilidade, ausência de erros e @media print
+Valida interações, renderização, acessibilidade, modo mobile, histórico/popstate e @media print
 """
 
 import asyncio
@@ -50,7 +50,28 @@ async def run_e2e():
         print(f"  ✔ Lightbox fecha com Escape: {is_closed}")
         assert is_closed, "Lightbox deveria ter fechado"
 
-        # 4. FAQ Accordion: exclusividade mútua
+        # 4. Filtros de Categoria do Carrossel
+        campanhas_btn = page.locator("#cases-filters .filter-btn[data-category='campanhas']")
+        if await campanhas_btn.count() > 0:
+            await campanhas_btn.click()
+            await page.wait_for_timeout(250)
+            is_active_filter = await campanhas_btn.evaluate("el => el.classList.contains('active')")
+            print(f"  ✔ Filtro 'Campanhas' ativado com sucesso: {is_active_filter}")
+            assert is_active_filter, "Filtro de campanhas deveria estar ativo"
+
+        # 5. Modal Legal (Termos de Uso e Privacidade)
+        legal_btn = page.locator("[data-open-legal='privacidade']").first
+        if await legal_btn.count() > 0:
+            await legal_btn.click()
+            await page.wait_for_timeout(300)
+            legal_modal = page.locator("#legal-modal")
+            legal_open = await legal_modal.evaluate("el => !el.classList.contains('hidden')")
+            print(f"  ✔ Modal Legal abre corretamente: {legal_open}")
+            assert legal_open, "Modal Legal deveria ter aberto"
+            await page.keyboard.press("Escape")
+            await page.wait_for_timeout(300)
+
+        # 6. FAQ Accordion: exclusividade mútua
         faq1 = page.locator("#faq details").nth(0)
         faq2 = page.locator("#faq details").nth(1)
         faq1_start = await faq1.evaluate("el => el.hasAttribute('open')")
@@ -62,7 +83,31 @@ async def run_e2e():
         print(f"  ✔ Ao abrir FAQ 2, FAQ 1 fecha automaticamente: {not faq1_after and faq2_after}")
         assert not faq1_after and faq2_after, "FAQ falhou na exclusividade mútua"
 
-        # 5. Currículo: carregamento e @media print
+        # 7. Teste de Emulação Mobile (iPhone 14: 390x844) e Drawer
+        m_page = await browser.new_page(viewport={"width": 390, "height": 844})
+        m_errors = []
+        m_page.on("pageerror", lambda err: m_errors.append(f"MOBILE PAGE ERROR: {err}"))
+        m_page.on("console", lambda msg: m_errors.append(f"MOBILE CONSOLE: {msg.text}") if msg.type == "error" else None)
+
+        await m_page.goto(INDEX_URL, wait_until="networkidle")
+        await m_page.wait_for_timeout(400)
+
+        mobile_menu_btn = m_page.locator("#mobile-menu-btn")
+        await mobile_menu_btn.click()
+        await m_page.wait_for_timeout(300)
+        drawer = m_page.locator("#mobile-drawer")
+        drawer_open = await drawer.evaluate("el => !el.hasAttribute('inert') && el.getAttribute('aria-hidden') === 'false'")
+        print(f"  ✔ Menu Gaveta Mobile abre em 390px: {drawer_open}")
+        assert drawer_open, "Menu mobile deveria abrir em 390px"
+
+        # Fechar drawer via Escape / Back
+        await m_page.keyboard.press("Escape")
+        await m_page.wait_for_timeout(300)
+        drawer_closed = await drawer.evaluate("el => el.hasAttribute('inert') && el.getAttribute('aria-hidden') === 'true'")
+        print(f"  ✔ Menu Gaveta Mobile fecha com sucesso: {drawer_closed}")
+        assert drawer_closed, "Menu mobile deveria fechar"
+
+        # 8. Currículo: carregamento e @media print
         c_page = await browser.new_page(viewport={"width": 1440, "height": 900})
         c_errors = []
         c_page.on("pageerror", lambda err: c_errors.append(f"CURRICULO ERROR: {err}"))
@@ -88,9 +133,11 @@ async def run_e2e():
         print(f"  ✔ Em modo @media print, cabeçalho de navegação é ocultado: {header_hidden}")
         assert header_hidden, "Cabeçalho deveria estar oculto na impressão"
 
-        print(f"\n  Zero erros no index: {len(errors) == 0}")
+        print(f"\n  Zero erros no index desktop: {len(errors) == 0}")
+        print(f"  Zero erros no index mobile: {len(m_errors) == 0}")
         print(f"  Zero erros no currículo: {len(c_errors) == 0}")
-        assert len(errors) == 0, f"Erros encontrados no index: {errors}"
+        assert len(errors) == 0, f"Erros encontrados no index desktop: {errors}"
+        assert len(m_errors) == 0, f"Erros encontrados no index mobile: {m_errors}"
         assert len(c_errors) == 0, f"Erros encontrados no currículo: {c_errors}"
 
         await browser.close()

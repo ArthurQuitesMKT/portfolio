@@ -7,13 +7,13 @@
   'use strict';
 
   // Ofuscação de dados sensíveis contra raspadores de código-fonte
-  const ENCODED_EMAIL = 'YXJ0aHVycXVpdGVzMkBnbWFpbC5jb20='; // arthurquites2@gmail.com
+  const ENCODED_EMAIL = 'YXJ0aHVycXVpdGVzMkBnbWFpbC5jb20=';
 
   function getContactEmail() {
     try {
       return atob(ENCODED_EMAIL);
     } catch (_) {
-      return 'arthurquites2@gmail.com';
+      return '';
     }
   }
 
@@ -54,9 +54,33 @@
     });
   }
 
+  /**
+   * Utilitário Sênior de Acessibilidade: Focus Trap (Prende a navegação Tab dentro de Modais/Drawers)
+   */
+  function trapFocusInContainer(e, container) {
+    if (e.key !== 'Tab' || !container) return;
+    const focusableSelectors = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const focusables = Array.from(container.querySelectorAll(focusableSelectors)).filter(
+      el => !el.closest('.hidden') && el.offsetParent !== null
+    );
+    if (!focusables.length) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   global.PortfolioUtils = {
     getContactEmail,
     escapeHTML,
-    copyTextToClipboard
+    copyTextToClipboard,
+    trapFocusInContainer
   };
 })(window);

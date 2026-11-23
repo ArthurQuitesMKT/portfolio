@@ -86,11 +86,12 @@ test('_headers deve conter política CSP idêntica a vercel.json', () => {
 });
 
 // 5. Módulo Centralizado DRY (js/shared-utils.js)
-test('js/shared-utils.js deve exportar métodos essenciais e ofuscar e-mail sensível', () => {
+test('js/shared-utils.js deve exportar métodos essenciais, focus trap e ofuscar e-mail sensível', () => {
   const js = fs.readFileSync(path.join(ROOT_DIR, 'js', 'shared-utils.js'), 'utf8');
   assert.ok(js.includes('getContactEmail'), 'Falta getContactEmail');
   assert.ok(js.includes('escapeHTML'), 'Falta escapeHTML');
   assert.ok(js.includes('copyTextToClipboard'), 'Falta copyTextToClipboard');
+  assert.ok(js.includes('trapFocusInContainer'), 'Falta trapFocusInContainer em PortfolioUtils');
   assert.ok(!js.includes('arthurquites2@gmail.com') || js.includes('ENCODED_EMAIL'), 'E-mail deve ser codificado');
 });
 
@@ -118,6 +119,33 @@ test('Todas as imagens referenciadas nos 32 cases de index.html devem existir em
     count++;
   }
   assert.ok(count >= 32, `Esperado pelo menos 32 imagens de cases, encontrado: ${count}`);
+});
+
+// 8. Integridade dos Canais de Conversão WhatsApp
+test('Todos os links de WhatsApp em index.html e curriculo.html devem apontar para 5531971454442', () => {
+  const indexHtml = fs.readFileSync(path.join(ROOT_DIR, 'index.html'), 'utf8');
+  const curriculoHtml = fs.readFileSync(path.join(ROOT_DIR, 'curriculo.html'), 'utf8');
+  const combined = indexHtml + '\n' + curriculoHtml;
+
+  const matches = [...combined.matchAll(/https?:\/\/(?:api\.whatsapp\.com|wa\.me)\/[^"'\s]+/g)].map(m => m[0]);
+  assert.ok(matches.length >= 8, `Esperado pelo menos 8 links de WhatsApp, encontrado: ${matches.length}`);
+
+  const phoneNumbers = new Set(matches.map(l => {
+    const m = l.match(/(?:phone=|wa\.me\/)(\d+)/);
+    return m ? m[1] : null;
+  }));
+
+  assert.strictEqual(phoneNumbers.size, 1, `Múltiplos números de WhatsApp encontrados: ${Array.from(phoneNumbers).join(', ')}`);
+  assert.ok(phoneNumbers.has('5531971454442'), 'Número canônico de WhatsApp deve ser 5531971454442');
+});
+
+// 9. Segurança de Repositório (Zero Tokens Expostos em .git/config)
+test('.git/config NÃO deve conter tokens de autenticação pessoais (PAT)', () => {
+  const gitConfigPath = path.join(ROOT_DIR, '.git', 'config');
+  if (fs.existsSync(gitConfigPath)) {
+    const gitConfig = fs.readFileSync(gitConfigPath, 'utf8');
+    assert.ok(!gitConfig.includes('ghp_'), 'Encontrado token pessoal do GitHub no arquivo .git/config!');
+  }
 });
 
 console.log('\n\x1b[32m✔ TODOS OS TESTES PASSARAM COM SUCESSO!\x1b[0m\n');
