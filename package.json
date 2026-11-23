@@ -1,0 +1,20 @@
+{
+  "name": "portfolio-arthur-quites",
+  "version": "2.0.0",
+  "description": "Portfólio & Currículo Interativo de Arthur Quites - Direção de Arte & Branding",
+  "main": "js/app.js",
+  "scripts": {
+    "test": "node tests/verify.test.js",
+    "test:e2e": "uv run --with playwright python tests/e2e_suite.py"
+  },
+  "keywords": [
+    "portfolio",
+    "branding",
+    "art-direction",
+    "civil-engineering",
+    "frontend"
+  ],
+  "author": "Arthur Quites <arthurquites2@gmail.com>",
+  "license": "UNLICENSED",
+  "private": true
+}

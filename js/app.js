@@ -284,17 +284,27 @@ function initLightbox() {
     }
   }
 
+  let isNavigating = false;
+  function navigateModal(direction) {
+    if (isNavigating) return;
+    isNavigating = true;
+    renderModalCard(currentCardIndex + direction);
+    setTimeout(() => {
+      isNavigating = false;
+    }, 180);
+  }
+
   if (nextBtn) {
     nextBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      renderModalCard(currentCardIndex + 1);
+      navigateModal(1);
     });
   }
 
   if (prevBtn) {
     prevBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      renderModalCard(currentCardIndex - 1);
+      navigateModal(-1);
     });
   }
 
@@ -328,9 +338,9 @@ function initLightbox() {
     if (e.key === 'Escape') {
       closeModal();
     } else if (e.key === 'ArrowRight') {
-      renderModalCard(currentCardIndex + 1);
+      navigateModal(1);
     } else if (e.key === 'ArrowLeft') {
-      renderModalCard(currentCardIndex - 1);
+      navigateModal(-1);
     } else {
       trapFocusInContainer(e, modal);
     }
@@ -355,29 +365,13 @@ function showToast(message) {
 }
 
 function copyTextToClipboard(text) {
+  if (window.PortfolioUtils && typeof window.PortfolioUtils.copyTextToClipboard === 'function') {
+    return window.PortfolioUtils.copyTextToClipboard(text);
+  }
   if (navigator.clipboard && window.isSecureContext) {
     return navigator.clipboard.writeText(text);
   }
-  // Fallback seguro para webviews, HTTP local e navegadores legados
-  return new Promise((resolve, reject) => {
-    try {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      textArea.setAttribute('readonly', '');
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      const successful = document.execCommand('copy');
-      document.body.removeChild(textArea);
-      if (successful) resolve();
-      else reject(new Error('execCommand copy failed'));
-    } catch (err) {
-      reject(err);
-    }
-  });
+  return Promise.reject(new Error('Área de transferência indisponível'));
 }
 
 function initEmailCopy() {
@@ -385,7 +379,8 @@ function initEmailCopy() {
     const btn = e.target.closest('[data-copy-email], .copy-email-btn');
     if (!btn) return;
 
-    const email = btn.getAttribute('data-copy-email') || 'arthurquites2@gmail.com';
+    const fallbackEmail = window.PortfolioUtils ? window.PortfolioUtils.getContactEmail() : 'arthurquites2@gmail.com';
+    const email = btn.getAttribute('data-copy-email') || fallbackEmail;
     copyTextToClipboard(email)
       .then(() => {
         showToast('E-mail copiado para a área de transferência!');

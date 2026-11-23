@@ -1,23 +1,195 @@
 /**
- * Skiper 54 — Shadcn clipPath Carousel (Carousel_006)
- * Implementação de alta fidelidade visual para o portfólio de Arthur Quites.
+ * Skiper 54 — Shadcn clipPath 3D Carousel (Carousel_006)
+ * Arquitetura Modular Senior: SRP (Single Responsibility Principle), WCAG 2.1 AA Keyboard Focus & XSS Shield
  * Baseado no componente oficial: https://skiper-ui.com/v1/skiper54
  */
 
 (function (global) {
   'use strict';
 
-  function escapeHTML(str) {
-    if (!str || typeof str !== 'string') return '';
-    return str.replace(/[&<>'"]/g, tag => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    }[tag] || tag));
+  const escapeHTML = (window.PortfolioUtils && window.PortfolioUtils.escapeHTML)
+    ? window.PortfolioUtils.escapeHTML
+    : function (str) {
+        if (!str || typeof str !== 'string') return '';
+        return str.replace(/[&<>'"]/g, tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag));
+      };
+
+  /* ==========================================================================
+     1. Módulo de Extração e Sanitização de Dados dos Projetos
+     ========================================================================== */
+  const ProjectDataExtractor = {
+    extract(track) {
+      const rawCards = Array.from(track.querySelectorAll('.project-card'));
+      return rawCards.map((card, idx) => {
+        const img = card.querySelector('img');
+        const badge = card.querySelector('.card-badge');
+        const title = card.querySelector('h3');
+        const desc = card.querySelector('p');
+        const category = card.getAttribute('data-category') || 'cases';
+
+        return {
+          id: idx,
+          src: img ? (img.getAttribute('src') || '') : '',
+          alt: img ? (img.getAttribute('alt') || '') : '',
+          badgeText: badge ? badge.textContent.trim() : '',
+          titleText: title ? title.textContent.trim() : `Projeto ${idx + 1}`,
+          descText: desc ? desc.textContent.trim() : '',
+          category: category
+        };
+      });
+    }
+  };
+
+  /* ==========================================================================
+     2. Módulo de Renderização e Atualização do DOM
+     ========================================================================== */
+  class CarouselRenderer {
+    constructor(track, viewport) {
+      this.track = track;
+      this.viewport = viewport;
+    }
+
+    setupContainers() {
+      this.viewport.className = 'skiper54-viewport relative w-full overflow-hidden py-6 cursor-grab active:cursor-grabbing select-none outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b00]/50 rounded-2xl';
+      this.viewport.style.overflow = 'hidden';
+      this.viewport.style.userSelect = 'none';
+      this.viewport.style.webkitUserSelect = 'none';
+      this.viewport.setAttribute('tabindex', '0');
+      this.viewport.setAttribute('role', 'region');
+      this.viewport.setAttribute('aria-roledescription', 'carousel');
+      this.viewport.setAttribute('aria-label', 'Carrossel de Cases e Projetos');
+
+      this.track.className = 'skiper54-track flex items-center will-change-transform';
+      this.track.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
+      this.track.style.display = 'flex';
+      this.track.style.gap = '0px';
+    }
+
+    renderItems(projectsData) {
+      this.track.innerHTML = projectsData.map((p, idx) => `
+        <article class="project-card skiper54-item ${idx === 0 ? 'is-active' : 'is-inactive'}" 
+                 data-category="${escapeHTML(p.category)}" 
+                 data-index="${idx}"
+                 aria-current="${idx === 0 ? 'true' : 'false'}">
+          <div class="skiper54-card-inner">
+            <div class="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#090c10]" style="background: radial-gradient(circle at 50% 40%, rgba(255, 107, 0, 0.08), #090c10 80%);">
+              <img src="${escapeHTML(p.src)}" alt="${escapeHTML(p.alt)}" draggable="false" class="relative z-10 w-full h-full object-contain p-2 sm:p-2.5 pointer-events-none select-none" loading="lazy" decoding="async">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none z-20"></div>
+            </div>
+            ${p.badgeText ? `
+              <div class="absolute top-4 left-4 pointer-events-none max-w-[85%] z-30">
+                <span class="inline-block px-2.5 py-1 rounded-md text-[10px] font-mono font-bold tracking-wider uppercase bg-orange-500/20 text-orange-400 border border-orange-500/35 backdrop-blur-md truncate max-w-full">
+                  ${escapeHTML(p.badgeText)}
+                </span>
+              </div>
+            ` : ''}
+            <button type="button" class="absolute bottom-4 right-4 p-2.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-300 hover:text-[#ff6b00] hover:border-[#ff6b00] transition-all cursor-pointer backdrop-blur-md shadow-lg z-30" data-lightbox-trigger aria-label="Ampliar projeto ${escapeHTML(p.titleText)}">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6m0 0v6m0-6l-7 7M9 21H3m0 0v-6m0 6l7-7"/></svg>
+            </button>
+          </div>
+          <div class="skiper54-caption pt-3 text-center px-2 pointer-events-none transition-all duration-300">
+            <h3 class="font-display font-bold text-white text-xs sm:text-sm tracking-tight line-clamp-2 min-h-[2.4em] leading-snug">${escapeHTML(p.titleText)}</h3>
+            <p class="text-[11px] text-zinc-400 truncate mt-0.5">${escapeHTML(p.descText)}</p>
+          </div>
+        </article>
+      `).join('');
+    }
   }
 
+  /* ==========================================================================
+     3. Módulo de Navegação por Pontos (Dots Indicator)
+     ========================================================================== */
+  class DotsManager {
+    constructor(dotsContainer) {
+      this.dotsContainer = dotsContainer;
+    }
+
+    render(visibleCount, currentIndex) {
+      if (!this.dotsContainer) return;
+      this.dotsContainer.innerHTML = '';
+      if (visibleCount <= 1) return;
+
+      const maxDots = Math.min(visibleCount, 12);
+      for (let i = 0; i < maxDots; i++) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'skiper54-dot-btn p-1.5 flex items-center justify-center cursor-pointer';
+        dot.setAttribute('aria-label', `Ir para projeto ${i + 1}`);
+        dot.setAttribute('data-dot-index', i);
+        dot.innerHTML = `<span class="skiper54-dot-pill block h-2 rounded-full transition-all duration-300 ${i === currentIndex ? 'w-8 bg-[#ff6b00] shadow-[0_0_12px_rgba(255,107,0,0.5)]' : 'w-2 bg-zinc-700 hover:bg-zinc-500'}"></span>`;
+        this.dotsContainer.appendChild(dot);
+      }
+    }
+
+    update(currentIndex, totalCount) {
+      if (!this.dotsContainer) return;
+      const dotPills = this.dotsContainer.querySelectorAll('.skiper54-dot-pill');
+      if (dotPills.length === 0) return;
+
+      const targetActiveDot = (totalCount <= 1 || dotPills.length <= 1)
+        ? 0
+        : Math.min(Math.round((currentIndex / (totalCount - 1)) * (dotPills.length - 1)), dotPills.length - 1);
+
+      dotPills.forEach((pill, idx) => {
+        if (idx === targetActiveDot) {
+          pill.className = 'skiper54-dot-pill block h-2 w-8 rounded-full bg-[#ff6b00] transition-all duration-300 cursor-pointer shadow-[0_0_12px_rgba(255,107,0,0.5)]';
+        } else {
+          pill.className = 'skiper54-dot-pill block h-2 w-2 rounded-full bg-zinc-700 hover:bg-zinc-500 transition-all duration-300 cursor-pointer';
+        }
+      });
+    }
+  }
+
+  /* ==========================================================================
+     4. Módulo de Autoplay Inteligente (Pausa no Hover, Visibility & Scroll)
+     ========================================================================== */
+  class AutoplayController {
+    constructor(advanceFn, delay = 3500) {
+      this.advanceFn = advanceFn;
+      this.delay = delay;
+      this.timer = null;
+      this.isPaused = false;
+    }
+
+    start() {
+      this.stop();
+      if (this.isPaused) return;
+      this.timer = setInterval(() => {
+        this.advanceFn();
+      }, this.delay);
+    }
+
+    stop() {
+      if (this.timer) {
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+    }
+
+    pause() {
+      this.isPaused = true;
+      this.stop();
+    }
+
+    resume() {
+      this.isPaused = false;
+      this.start();
+    }
+
+    restart() {
+      this.start();
+    }
+  }
+
+  /* ==========================================================================
+     5. Orquestrador Principal do Carrossel Skiper 54
+     ========================================================================== */
   function enhanceCasesSection() {
     const track = document.getElementById('cases-track');
     const viewport = document.getElementById('cases-carousel-viewport');
@@ -29,29 +201,10 @@
 
     if (!track || !viewport) return;
 
-    // Extrai dados dos 32 cards originais do DOM
-    const rawCards = Array.from(track.querySelectorAll('.project-card'));
-    if (rawCards.length === 0) return;
+    const projectsData = ProjectDataExtractor.extract(track);
+    if (projectsData.length === 0) return;
 
-    const projectsData = rawCards.map((card, idx) => {
-      const img = card.querySelector('img');
-      const badge = card.querySelector('.card-badge');
-      const title = card.querySelector('h3');
-      const desc = card.querySelector('p');
-      const category = card.getAttribute('data-category') || 'cases';
-
-      return {
-        id: idx,
-        src: img ? (img.getAttribute('src') || '') : '',
-        alt: img ? (img.getAttribute('alt') || '') : '',
-        badgeText: badge ? badge.textContent.trim() : '',
-        titleText: title ? title.textContent.trim() : `Projeto ${idx + 1}`,
-        descText: desc ? desc.textContent.trim() : '',
-        category: category
-      };
-    });
-
-    // Atualiza automaticamente os contadores dos botões de filtro com base no DOM real
+    // Atualiza contadores dos botões de filtro
     if (filterContainer) {
       const categoryLabels = {
         all: 'Todos',
@@ -70,99 +223,24 @@
       });
     }
 
-    // Reestrutura o Viewport e Track para a mecânica Skiper 54
-    viewport.className = 'skiper54-viewport relative w-full overflow-hidden py-6 cursor-grab active:cursor-grabbing select-none';
-    viewport.style.overflow = 'hidden';
-    viewport.style.userSelect = 'none';
-    viewport.style.webkitUserSelect = 'none';
+    // Inicializa Renderizador e Dots
+    const renderer = new CarouselRenderer(track, viewport);
+    renderer.setupContainers();
+    renderer.renderItems(projectsData);
 
-    track.className = 'skiper54-track flex items-center will-change-transform';
-    track.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
-    track.style.display = 'flex';
-    track.style.gap = '0px';
+    const dotsManager = new DotsManager(dotsContainer);
+    const allItems = Array.from(track.querySelectorAll('.skiper54-item'));
 
-    track.innerHTML = projectsData.map((p, idx) => `
-      <article class="project-card skiper54-item ${idx === 0 ? 'is-active' : 'is-inactive'}" 
-               data-category="${p.category}" 
-               data-index="${idx}"
-               aria-current="${idx === 0 ? 'true' : 'false'}">
-        <div class="skiper54-card-inner">
-          <div class="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#090c10]" style="background: radial-gradient(circle at 50% 40%, rgba(255, 107, 0, 0.08), #090c10 80%);">
-            <img src="${p.src}" alt="${escapeHTML(p.alt)}" draggable="false" class="relative z-10 w-full h-full object-contain p-2 sm:p-2.5 pointer-events-none select-none" loading="lazy" decoding="async">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none z-20"></div>
-          </div>
-          ${p.badgeText ? `
-            <div class="absolute top-4 left-4 pointer-events-none max-w-[85%] z-30">
-              <span class="inline-block px-2.5 py-1 rounded-md text-[10px] font-mono font-bold tracking-wider uppercase bg-orange-500/20 text-orange-400 border border-orange-500/35 backdrop-blur-md truncate max-w-full">
-                ${escapeHTML(p.badgeText)}
-              </span>
-            </div>
-          ` : ''}
-          <button type="button" class="absolute bottom-4 right-4 p-2.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-300 hover:text-[#ff6b00] hover:border-[#ff6b00] transition-all cursor-pointer backdrop-blur-md shadow-lg z-30" data-lightbox-trigger aria-label="Ampliar projeto ${escapeHTML(p.titleText)}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6m0 0v6m0-6l-7 7M9 21H3m0 0v-6m0 6l7-7"/></svg>
-          </button>
-        </div>
-        <div class="skiper54-caption pt-3 text-center px-2 pointer-events-none transition-all duration-300">
-          <h3 class="font-display font-bold text-white text-xs sm:text-sm tracking-tight line-clamp-2 min-h-[2.4em] leading-snug">${escapeHTML(p.titleText)}</h3>
-          <p class="text-[11px] text-zinc-400 truncate mt-0.5">${escapeHTML(p.descText)}</p>
-        </div>
-      </article>
-    `).join('');
-
-    // Estado interno do Carrossel Skiper 54
     let currentIndex = 0;
     let currentCategory = 'all';
-    let isDragging = false;
-    let startX = 0;
-    let dragDistance = 0;
     let currentTranslate = 0;
     let prevTranslate = 0;
-    let autoplayTimer = null;
-
-    const allItems = Array.from(track.querySelectorAll('.skiper54-item'));
+    let dragDistance = 0;
 
     function getVisibleItems() {
       return allItems.filter(item => {
         const cat = item.getAttribute('data-category') || '';
         return currentCategory === 'all' || cat.includes(currentCategory);
-      });
-    }
-
-    function renderDots(visibleCount) {
-      if (!dotsContainer) return;
-      dotsContainer.innerHTML = '';
-      if (visibleCount <= 1) return;
-
-      const maxDots = Math.min(visibleCount, 12);
-      for (let i = 0; i < maxDots; i++) {
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'skiper54-dot-btn p-1.5 flex items-center justify-center cursor-pointer';
-        dot.setAttribute('aria-label', `Ir para projeto ${i + 1}`);
-        dot.setAttribute('data-dot-index', i);
-        dot.innerHTML = `<span class="skiper54-dot-pill block h-2 rounded-full transition-all duration-300 ${i === currentIndex ? 'w-8 bg-[#ff6b00] shadow-[0_0_12px_rgba(255,107,0,0.5)]' : 'w-2 bg-zinc-700 hover:bg-zinc-500'}"></span>`;
-        dotsContainer.appendChild(dot);
-      }
-    }
-
-    function getActiveDotIndex(currIdx, totalCount, dotsCount) {
-      if (totalCount <= 1 || dotsCount <= 1) return 0;
-      return Math.min(Math.round((currIdx / (totalCount - 1)) * (dotsCount - 1)), dotsCount - 1);
-    }
-
-    function updateDotsState() {
-      if (!dotsContainer) return;
-      const visible = getVisibleItems();
-      const dotPills = dotsContainer.querySelectorAll('.skiper54-dot-pill');
-      if (dotPills.length === 0) return;
-      const targetActiveDot = getActiveDotIndex(currentIndex, visible.length, dotPills.length);
-
-      dotPills.forEach((pill, idx) => {
-        if (idx === targetActiveDot) {
-          pill.className = 'skiper54-dot-pill block h-2 w-8 rounded-full bg-[#ff6b00] transition-all duration-300 cursor-pointer shadow-[0_0_12px_rgba(255,107,0,0.5)]';
-        } else {
-          pill.className = 'skiper54-dot-pill block h-2 w-2 rounded-full bg-zinc-700 hover:bg-zinc-500 transition-all duration-300 cursor-pointer';
-        }
       });
     }
 
@@ -189,16 +267,10 @@
       currentTranslate = -(itemLeft - centerOffset);
       prevTranslate = currentTranslate;
 
-      if (!animate) {
-        track.style.transition = 'none';
-      } else {
-        track.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
-      }
-
+      track.style.transition = animate ? 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
       viewport.scrollLeft = 0;
       track.style.transform = `translateX(${currentTranslate}px)`;
 
-      // Aplica classes de aceleração GPU e transição suave
       visible.forEach((item, vIdx) => {
         const isActive = (vIdx === index);
         item.classList.toggle('is-active', isActive);
@@ -206,52 +278,27 @@
         item.setAttribute('aria-current', isActive ? 'true' : 'false');
       });
 
-      // Atualiza Indicador Numérico
       if (indicator) {
         indicator.textContent = `${String(currentIndex + 1).padStart(2, '0')} / ${String(visible.length).padStart(2, '0')}`;
       }
 
-      updateDotsState();
+      dotsManager.update(currentIndex, visible.length);
     }
 
-    function next() {
-      goTo(currentIndex + 1);
-    }
+    const autoplay = new AutoplayController(() => goTo(currentIndex + 1));
 
-    function prev() {
-      goTo(currentIndex - 1);
-    }
-
-    function startAutoplay() {
-      stopAutoplay();
-      autoplayTimer = setInterval(() => {
-        next();
-      }, 3500);
-    }
-
-    function stopAutoplay() {
-      if (autoplayTimer) {
-        clearInterval(autoplayTimer);
-        autoplayTimer = null;
-      }
-    }
-
-    function resetAutoplay() {
-      startAutoplay();
-    }
-
-    // Interações de Navegação
+    // Navegação via botões
     if (prevBtn) {
       prevBtn.addEventListener('click', () => {
-        prev();
-        resetAutoplay();
+        goTo(currentIndex - 1);
+        autoplay.restart();
       });
     }
 
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
-        next();
-        resetAutoplay();
+        goTo(currentIndex + 1);
+        autoplay.restart();
       });
     }
 
@@ -266,12 +313,12 @@
             ? Math.min(Math.round((dotIdx / (dotPills.length - 1)) * (visible.length - 1)), visible.length - 1)
             : 0;
           goTo(targetIndex);
-          resetAutoplay();
+          autoplay.restart();
         }
       });
     }
 
-    // Clique nos cards: Clicar em card vizinho inativo centraliza o card; clicar no ativo abre o Lightbox
+    // Clique nos cards: centraliza ou abre Lightbox se já estiver ativo
     allItems.forEach((item) => {
       item.addEventListener('click', (e) => {
         if (dragDistance > 8 || e.target.closest('[data-lightbox-trigger]')) return;
@@ -283,18 +330,15 @@
           e.preventDefault();
           e.stopPropagation();
           goTo(vIdx);
-          resetAutoplay();
+          autoplay.restart();
         } else {
-          // Se o card já está centralizado/ativo, clicar na imagem abre o Lightbox diretamente
           const trigger = item.querySelector('[data-lightbox-trigger]');
-          if (trigger) {
-            trigger.click();
-          }
+          if (trigger) trigger.click();
         }
       });
     });
 
-    // Filtros de Categoria Dinâmicos
+    // Filtros de Categoria
     if (filterContainer) {
       filterContainer.addEventListener('click', (e) => {
         const btn = e.target.closest('.filter-btn');
@@ -311,7 +355,6 @@
 
         currentCategory = btn.getAttribute('data-category') || 'all';
 
-        // Atualiza visibilidade dos itens no DOM
         allItems.forEach(item => {
           const cat = item.getAttribute('data-category') || '';
           const matches = (currentCategory === 'all' || cat.includes(currentCategory));
@@ -319,24 +362,25 @@
         });
 
         const visible = getVisibleItems();
-        renderDots(visible.length);
-        currentIndex = 0;
+        dotsManager.render(visible.length, 0);
         goTo(0, false);
-        resetAutoplay();
+        autoplay.restart();
       });
     }
 
-    // Engine Híbrida de Gestos Touch (Mobile) & Mouse (Desktop) com Direction-Locking
+    /* ==========================================================================
+       6. Gestos Touch (Mobile) & Mouse (Desktop) com Direction Locking
+       ========================================================================== */
     let moveRaf = null;
+    let isMouseDragging = false;
+    let mouseStartX = 0;
     let touchStartX = 0;
     let touchStartY = 0;
     let isHorizontalSwipe = false;
     let isVerticalScroll = false;
+    let isDragging = false;
 
-    // --- MOUSE DESKTOP ---
-    let isMouseDragging = false;
-    let mouseStartX = 0;
-
+    // Desktop Mouse Drag
     const onMouseMove = (e) => {
       if (!isMouseDragging) return;
       const diffX = e.pageX - mouseStartX;
@@ -366,32 +410,28 @@
       track.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
       const movedBy = (e.pageX || mouseStartX) - mouseStartX;
 
-      if (movedBy < -55) {
-        next();
-      } else if (movedBy > 55) {
-        prev();
-      } else {
-        goTo(currentIndex);
-      }
+      if (movedBy < -55) goTo(currentIndex + 1);
+      else if (movedBy > 55) goTo(currentIndex - 1);
+      else goTo(currentIndex);
 
-      resetAutoplay();
+      autoplay.restart();
     };
 
-    const onMouseDown = (e) => {
+    viewport.addEventListener('mousedown', (e) => {
       if (e.button !== 0 || e.target.closest('[data-lightbox-trigger]')) return;
       isMouseDragging = true;
       isDragging = false;
       mouseStartX = e.pageX;
       dragDistance = 0;
       track.style.transition = 'none';
-      stopAutoplay();
+      autoplay.stop();
 
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseEnd);
-    };
+    });
 
-    // --- TOUCH ENGINE MOBILE (Zero-Jank, Permite Scroll Vertical Nativo da Página) ---
-    const onTouchStart = (e) => {
+    // Mobile Touch com Trava de Direção (Direction Lock)
+    viewport.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1 || e.target.closest('[data-lightbox-trigger]')) return;
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
@@ -399,10 +439,10 @@
       isVerticalScroll = false;
       isDragging = false;
       dragDistance = 0;
-      stopAutoplay();
-    };
+      autoplay.stop();
+    }, { passive: true });
 
-    const onTouchMove = (e) => {
+    viewport.addEventListener('touchmove', (e) => {
       if (isVerticalScroll || e.touches.length !== 1) return;
 
       const currentX = e.touches[0].clientX;
@@ -410,15 +450,12 @@
       const diffX = currentX - touchStartX;
       const diffY = currentY - touchStartY;
 
-      // Trava de Direção (Direction Lock): identifica se o usuário quer rolar a página ou arrastar o carrossel
       if (!isHorizontalSwipe && !isVerticalScroll) {
         if (Math.abs(diffY) > 6 && Math.abs(diffY) > Math.abs(diffX)) {
-          // O usuário está rolando a página: entrega 100% o controle para o navegador nativo
           isVerticalScroll = true;
           return;
         }
         if (Math.abs(diffX) > 6 && Math.abs(diffX) >= Math.abs(diffY)) {
-          // O usuário está arrastando o carrossel horizontalmente
           isHorizontalSwipe = true;
           isDragging = true;
           track.style.transition = 'none';
@@ -426,9 +463,7 @@
       }
 
       if (isHorizontalSwipe && isDragging) {
-        if (e.cancelable) {
-          e.preventDefault(); // Impede que a tela balance verticalmente durante o swipe do carrossel
-        }
+        if (e.cancelable) e.preventDefault();
         dragDistance = Math.abs(diffX);
 
         if (!moveRaf) {
@@ -438,7 +473,7 @@
           });
         }
       }
-    };
+    }, { passive: false });
 
     const onTouchEnd = (e) => {
       if (moveRaf) {
@@ -452,69 +487,67 @@
         const endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : touchStartX;
         const movedBy = endX - touchStartX;
 
-        if (movedBy < -40) {
-          next();
-        } else if (movedBy > 40) {
-          prev();
-        } else {
-          goTo(currentIndex);
-        }
+        if (movedBy < -40) goTo(currentIndex + 1);
+        else if (movedBy > 40) goTo(currentIndex - 1);
+        else goTo(currentIndex);
       }
 
       isHorizontalSwipe = false;
       isVerticalScroll = false;
       isDragging = false;
-      resetAutoplay();
+      autoplay.restart();
     };
 
-    viewport.addEventListener('mousedown', onMouseDown);
-    viewport.addEventListener('touchstart', onTouchStart, { passive: true });
-    viewport.addEventListener('touchmove', onTouchMove, { passive: false });
     viewport.addEventListener('touchend', onTouchEnd, { passive: true });
     viewport.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
-    // Pausa no hover do carrossel
-    viewport.addEventListener('mouseenter', stopAutoplay);
-    viewport.addEventListener('mouseleave', resetAutoplay);
+    // Pausa no Hover do mouse
+    viewport.addEventListener('mouseenter', () => autoplay.pause());
+    viewport.addEventListener('mouseleave', () => autoplay.resume());
 
-    // Otimização Sênior de Autoplay: desliga quando a seção sai da tela ou a aba é ocultada
+    // Observer de Visibilidade do Carrossel
     let isCarouselVisible = false;
     const visibilityObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         isCarouselVisible = entry.isIntersecting;
-        if (isCarouselVisible) {
-          startAutoplay();
-        } else {
-          stopAutoplay();
-        }
+        if (isCarouselVisible) autoplay.start();
+        else autoplay.stop();
       });
     }, { threshold: 0.1 });
     visibilityObserver.observe(viewport);
 
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        stopAutoplay();
-      } else if (isCarouselVisible) {
-        startAutoplay();
-      }
+      if (document.hidden) autoplay.stop();
+      else if (isCarouselVisible) autoplay.start();
     });
 
-    // Teclado (Setas Esquerda e Direita quando a seção estiver no foco)
+    /* ==========================================================================
+       7. Teclado com Verificação Estrita de Foco (Sem Sequestro Global)
+       ========================================================================== */
     window.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+
       const activeEl = document.activeElement;
       if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) return;
-      if (document.getElementById('lightbox-modal') && !document.getElementById('lightbox-modal').classList.contains('hidden')) return;
 
-      const rect = viewport.getBoundingClientRect();
-      const inView = rect.top < window.innerHeight && rect.bottom > 0;
-      if (!inView) return;
+      // Não intercepta se o modal lightbox estiver aberto
+      const lightboxModal = document.getElementById('lightbox-modal');
+      if (lightboxModal && !lightboxModal.classList.contains('hidden')) return;
+
+      // Proteção de Foco: apenas responde se o foco estiver dentro da seção de cases (#cases)
+      const casesSection = document.getElementById('cases');
+      const isFocusedInCases = casesSection && casesSection.contains(activeEl);
+
+      if (!isFocusedInCases) return;
 
       if (e.key === 'ArrowLeft') {
-        prev();
-        resetAutoplay();
+        e.preventDefault();
+        goTo(currentIndex - 1);
+        autoplay.restart();
       } else if (e.key === 'ArrowRight') {
-        next();
-        resetAutoplay();
+        e.preventDefault();
+        goTo(currentIndex + 1);
+        autoplay.restart();
       }
     });
 
@@ -529,13 +562,13 @@
 
     // Inicialização
     const initialVisible = getVisibleItems();
-    renderDots(initialVisible.length);
+    dotsManager.render(initialVisible.length, 0);
     goTo(0, false);
-    startAutoplay();
+    autoplay.start();
   }
 
   global.Skiper54 = {
-    enhanceCasesSection: enhanceCasesSection
+    enhanceCasesSection
   };
 
 })(window);
