@@ -74,17 +74,7 @@ body {
 }
 
 .bg-blueprint-grid {
-  position: fixed;
-  inset: 0;
-  pointer-events: none !important;
-  z-index: 1 !important;
-  will-change: transform;
-  background:
-    radial-gradient(1200px circle at 85% 10%, rgba(255, 255, 255, 0.05), transparent 70%),
-    radial-gradient(900px circle at 15% 45%, rgba(0, 0, 0, 0.05), transparent 65%),
-    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.10) 1px, transparent 0) !important;
-  background-size: 100% 100%, 100% 100%, 28px 28px !important;
-  opacity: 0.35 !important;
+  display: none !important;
 }
 
 .bg-blueprint-grid::after {
