@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMetricCounters();
   initScrollSpy();
   initHeroAnimatedGradient();
+  initWhatsAppConversionTracking();
 });
 
 /**
@@ -832,3 +833,28 @@ window.addEventListener('popstate', () => {
     document.body.style.overflow = '';
   }
 });
+
+/* ==========================================================================
+   12. Telemetria de Conversão: Rastreamento de Cliques no WhatsApp (GA4 / GTM)
+   ========================================================================== */
+function initWhatsAppConversionTracking() {
+  const whatsappLinks = document.querySelectorAll('a[href*="api.whatsapp.com"], a[href*="wa.me"]');
+  whatsappLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const label = link.getAttribute('aria-label') || link.innerText.trim() || 'Botão WhatsApp';
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'generate_lead', {
+          event_category: 'Conversão',
+          event_label: label,
+          transport_type: 'beacon'
+        });
+      }
+      if (window.dataLayer && Array.isArray(window.dataLayer)) {
+        window.dataLayer.push({
+          event: 'whatsapp_click',
+          conversion_label: label
+        });
+      }
+    }, { passive: true });
+  });
+}

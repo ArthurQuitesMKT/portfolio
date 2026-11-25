@@ -6,6 +6,7 @@ Allow: /
 Allow: /dist/
 Allow: /assets/
 Allow: /js/
+Allow: /curriculo
 Allow: /curriculo.html
 
 # Sitemap oficial

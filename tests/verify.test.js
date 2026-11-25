@@ -148,4 +148,19 @@ test('.git/config NÃO deve conter tokens de autenticação pessoais (PAT)', () 
   }
 });
 
+// 10. SEO Técnico: Rotas Limpas, Sitemap & Telemetria
+test('index.html e sitemap.xml devem usar rotas canônicas limpas e app.js deve conter telemetria', () => {
+  const indexHtml = fs.readFileSync(path.join(ROOT_DIR, 'index.html'), 'utf8');
+  assert.ok(!indexHtml.includes('href="index.html"'), 'Encontrado href="index.html" em index.html!');
+  assert.ok(!indexHtml.includes('href="curriculo.html"'), 'Encontrado href="curriculo.html" em index.html!');
+  assert.ok(indexHtml.includes('href="/curriculo"'), 'Falta link limpo para /curriculo');
+
+  const sitemap = fs.readFileSync(path.join(ROOT_DIR, 'sitemap.xml'), 'utf8');
+  assert.ok(!sitemap.includes('/curriculo.html'), 'sitemap.xml não deve conter .html nas URLs');
+  assert.ok(sitemap.includes('/curriculo'), 'sitemap.xml deve conter /curriculo');
+
+  const appJs = fs.readFileSync(path.join(ROOT_DIR, 'js', 'app.js'), 'utf8');
+  assert.ok(appJs.includes('initWhatsAppConversionTracking'), 'Falta initWhatsAppConversionTracking em app.js');
+});
+
 console.log('\n\x1b[32m✔ TODOS OS TESTES PASSARAM COM SUCESSO!\x1b[0m\n');
