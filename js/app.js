@@ -113,38 +113,42 @@ const CATEGORY_DISPLAY_MAP = {
   campanhas: 'Campanhas',
   cases: 'Cases',
   institucionais: 'Institucional',
-  anuncios: 'Anúncios'
+  anuncios: 'Anúncios',
+  contabilidade: 'Contabilidade',
+  advocacia: 'Advocacia'
 };
 
+/* Para cadastrar um novo estudo: adicione uma chave com o nome do arquivo da imagem.
+   Sem entrada aqui, o modal usa o texto padrão da categoria (getFallbackStudy). */
 const CASE_STUDIES_DATA = {
   'campanhas_21-de-stembro.webp': {
-    desafio: 'Humanizar a presença digital da construtora conectando sustentabilidade cívica ao posicionamento da marca.',
-    solucao: 'Direção de arte minimalista com tipografia clean, textura orgânica e paleta de tons terrosos alinhada ao Brand Book.',
-    impacto: 'Taxa de engajamento 4.2x acima da média do setor com mais de 35% de novos compartilhamentos espontâneos.'
+    desafio: 'Ligar a construtora a uma data cívica sem forçar o assunto obras.',
+    solucao: 'Arte minimalista, tipografia limpa e tons terrosos, seguindo o manual de marca.',
+    impacto: 'Engajamento 4.2x acima da média do setor e mais de 35% de compartilhamentos espontâneos.'
   },
   'campanhas_Aniversario_JoaoPessoa.webp': {
-    desafio: 'Celebrar a expansão das obras para a capital paraibana gerando conexão institucional autêntica com o público regional.',
-    solucao: 'Fotografia aérea em ângulo dourado com tratamento cinematográfico e grid tipográfico integrado.',
+    desafio: 'Marcar a chegada das obras à capital paraibana e se aproximar do público da região.',
+    solucao: 'Foto aérea no fim da tarde, com tratamento de cor de cinema e a tipografia encaixada na composição.',
     impacto: 'Pico de 12.400 impressões orgânicas únicas na região metropolitana de João Pessoa.'
   },
   'campanhas_diadamulhereng.webp': {
-    desafio: 'Destacar a liderança técnica feminina nos canteiros de obras fugindo de clichês visuais genéricos.',
-    solucao: 'Composição fotográfica autoral valorizando EPIs homologados, postura executiva e tipografia de alto impacto.',
-    impacto: 'Top 4 postagem de maior engajamento orgânico do ano no ecossistema digital da construtora.'
+    desafio: 'Dar visibilidade às engenheiras e técnicas de campo sem recorrer ao visual genérico de data comemorativa.',
+    solucao: 'Foto autoral das profissionais em obra, com EPIs reais, postura de liderança e título em destaque.',
+    impacto: 'Quarta postagem de maior engajamento orgânico do ano no perfil da construtora.'
   },
   'cases_OBRATJAM_01.webp': {
-    desafio: 'Transmitir solidez, conformidade técnica e transparência em obra judiciária de alta complexidade.',
-    solucao: 'Fotografia arquitetônica de ângulo baixo valorizando as linhas estruturais e selos técnicos de engenharia.',
-    impacto: 'Apresentado em relatório institucional C-Level e aprovado por comissão pública de fiscalização.'
+    desafio: 'Passar segurança e transparência em uma obra judiciária de grande porte.',
+    solucao: 'Foto de ângulo baixo que mostra a estrutura do prédio, com os selos técnicos da obra aplicados na peça.',
+    impacto: 'Usada em relatório para a diretoria e aprovada pela comissão pública de fiscalização.'
   },
   'cases_Sem-T_tulo-1_01.webp': {
-    desafio: 'Evidenciar a transformação e o rigor técnico da revitalização predial de um equipamento público educacional em João Pessoa - PB.',
-    solucao: 'Direção de arte em formato comparativo Antes vs. Depois com diagramação limpa, destacando acabamento, pintura geométrica e requalificação do auditório.',
-    impacto: 'Comprovação visual de capacidade executiva em retrofit predial para novas licitações públicas e concorrências de grande porte.'
+    desafio: 'Mostrar a transformação de um prédio público de ensino em João Pessoa - PB, do estado antigo ao reformado.',
+    solucao: 'Layout de Antes e Depois com a foto dividida ao meio, destacando pintura, acabamento e a nova fachada do auditório.',
+    impacto: 'Serve como prova de capacidade em reformas de prédios públicos nas próximas licitações.'
   },
   'institucionais_basesolida.webp': {
-    desafio: 'Diferenciar a empresa da concorrência ressaltando a engenharia de fundações e a confiabilidade de longo prazo.',
-    solucao: 'Contraste cromático grafite/laranja industrial destacando armaduras de aço e concreto estrutural.',
+    desafio: 'Transformar a fundação, que fica enterrada e quase ninguém vê, em motivo para confiar na construtora.',
+    solucao: 'Contraste entre grafite e laranja, com vergalhões de aço e concreto estrutural em primeiro plano.',
     impacto: '+490% de impressões no LinkedIn entre diretores de novos negócios e gestores de licitações.'
   }
 };
@@ -174,29 +178,29 @@ function initLightbox() {
     const catLower = (category || '').toLowerCase();
     if (catLower.includes('campanha')) {
       return {
-        desafio: `Comunicar a pauta "${title}" mantendo a sobriedade corporativa da engenharia e gerando conexão humana real.`,
-        solucao: 'Direção de arte editorial alinhada ao Brand Book Master, unindo hierarquia tipográfica limpa e paleta temática controlada.',
-        impacto: 'Fortalecimento de marca empregadora (Employer Branding), engajamento de equipes de obra e alcance orgânico qualificado.'
+        desafio: `Comunicar o tema "${title}" com sobriedade e um toque humano, sem perder o tom profissional da empresa.`,
+        solucao: 'Arte editorial seguindo o manual de marca, com hierarquia de texto limpa e paleta própria do tema.',
+        impacto: 'Fortalece a marca como empregadora, aproxima as equipes e amplia o alcance orgânico.'
       };
     }
     if (catLower.includes('case')) {
       return {
-        desafio: `Apresentar a entrega técnica do projeto "${title}" como prova concreta de capacidade construtiva para licitações e clientes B2B.`,
-        solucao: 'Enquadramento arquitetônico de precisão, valorização do porte da obra e diagramação técnica de alta leitura.',
-        impacto: 'Ativo de autoridade comercial utilizado para comprovação de portfólio perante órgãos públicos e diretoria.'
+        desafio: `Mostrar a entrega do projeto "${title}" como prova de capacidade para licitações e clientes B2B.`,
+        solucao: 'Enquadramento que valoriza o porte da obra e diagramação técnica fácil de ler.',
+        impacto: 'Material de portfólio para apresentar a órgãos públicos e à diretoria.'
       };
     }
     if (catLower.includes('anúncio') || catLower.includes('anuncio')) {
       return {
-        desafio: `Atrair profissionais qualificados para "${title}" com comunicação clara, direta e alinhada à governança de RH.`,
-        solucao: 'Layout modular de recrutamento com leitura instantânea de requisitos, local de atuação e canal oficial de envio.',
-        impacto: 'Aceleração da triagem de candidatos qualificados e redução do tempo de fechamento de vagas operacionais e técnicas.'
+        desafio: `Atrair profissionais para "${title}" com uma mensagem direta e clara.`,
+        solucao: 'Layout modular que mostra requisitos, local de atuação e canal de envio em uma leitura rápida.',
+        impacto: 'Triagem mais rápida de candidatos e menos tempo para fechar vagas operacionais e técnicas.'
       };
     }
     return {
-      desafio: `Traduzir o tema institucional "${title}" em uma peça de autoridade visual para decisores do setor de engenharia.`,
-      solucao: description || 'Aplicação dos templates canônicos da marca com foco em clareza técnica, contraste executivo e leitura mobile-first.',
-      impacto: 'Consolidação da identidade corporativa e crescimento sustentado de impressões orgânicas no Instagram e LinkedIn.'
+      desafio: `Transformar o tema "${title}" em uma peça que passe credibilidade para quem decide contratar.`,
+      solucao: description || 'Aplicação dos modelos da marca com foco em clareza técnica, contraste e leitura no celular.',
+      impacto: 'Reforça a identidade da empresa e sustenta o crescimento de impressões orgânicas no Instagram e LinkedIn.'
     };
   }
 

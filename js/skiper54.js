@@ -202,7 +202,9 @@
         campanhas: 'Campanhas',
         cases: 'Cases',
         institucionais: 'Posts Institucionais',
-        anuncios: 'Anúncios'
+        anuncios: 'Anúncios',
+    contabilidade: 'Contabilidade',
+    advocacia: 'Advocacia'
       };
       filterContainer.querySelectorAll('.filter-btn').forEach(btn => {
         const cat = btn.getAttribute('data-category') || 'all';

@@ -1158,3 +1158,9 @@ section[aria-label="Apresentação executiva"] a.bg-\[\#ff6b00\]:hover {
     padding: 0.65rem !important;
   }
 }
+
+/* Passo a passo dentro do FAQ (objecao de tempo) */
+.faq-steps { list-style: decimal; padding-left: 1.25rem; }
+.faq-steps li { padding-left: 0.25rem; }
+.faq-steps li::marker { color: #fb923c; font-weight: 700; }
+
