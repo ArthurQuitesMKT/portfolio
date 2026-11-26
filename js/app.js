@@ -80,7 +80,10 @@ function initMobileDrawer() {
 
   panel.addEventListener('click', (e) => {
     if (e.target.closest('.mobile-nav-link')) {
-      closeDrawer(false);
+      if (window.history && window.history.replaceState && window.history.state && window.history.state.modalOpen === 'drawer') {
+        window.history.replaceState(null, '');
+      }
+      closeDrawer(false, true);
     }
   });
 
@@ -133,6 +136,11 @@ const CASE_STUDIES_DATA = {
     desafio: 'Transmitir solidez, conformidade técnica e transparência em obra judiciária de alta complexidade.',
     solucao: 'Fotografia arquitetônica de ângulo baixo valorizando as linhas estruturais e selos técnicos de engenharia.',
     impacto: 'Apresentado em relatório institucional C-Level e aprovado por comissão pública de fiscalização.'
+  },
+  'cases_Sem-T_tulo-1_01.webp': {
+    desafio: 'Evidenciar a transformação e o rigor técnico da revitalização predial de um equipamento público educacional em João Pessoa - PB.',
+    solucao: 'Direção de arte em formato comparativo Antes vs. Depois com diagramação limpa, destacando acabamento, pintura geométrica e requalificação do auditório.',
+    impacto: 'Comprovação visual de capacidade executiva em retrofit predial para novas licitações públicas e concorrências de grande porte.'
   },
   'institucionais_basesolida.webp': {
     desafio: 'Diferenciar a empresa da concorrência ressaltando a engenharia de fundações e a confiabilidade de longo prazo.',
@@ -351,6 +359,10 @@ function initLightbox() {
    ========================================================================== */
 function showToast(message) {
   const toast = document.getElementById('toast-notification');
+  if (window.PortfolioUtils && typeof window.PortfolioUtils.showToastNotification === 'function') {
+    window.PortfolioUtils.showToastNotification(toast, message, 2800);
+    return;
+  }
   if (!toast) return;
   const msgEl = toast.querySelector('.toast-message');
   if (msgEl && message) msgEl.textContent = message;
@@ -835,12 +847,22 @@ window.addEventListener('popstate', () => {
 });
 
 /* ==========================================================================
-   12. Telemetria de Conversão: Rastreamento de Cliques no WhatsApp (GA4 / GTM)
+   13. Telemetria de Conversão: Rastreamento de Cliques no WhatsApp (GA4 / GTM)
+   com Debounce / Cooldown contra Cliques Duplos
    ========================================================================== */
 function initWhatsAppConversionTracking() {
   const whatsappLinks = document.querySelectorAll('a[href*="api.whatsapp.com"], a[href*="wa.me"]');
+  let lastConversionTimestamp = 0;
+  const CONVERSION_COOLDOWN_MS = 2000;
+
   whatsappLinks.forEach(link => {
     link.addEventListener('click', () => {
+      const now = Date.now();
+      if (now - lastConversionTimestamp < CONVERSION_COOLDOWN_MS) {
+        return; // Previne duplicidade de eventos no GA4 em caso de cliques repetidos
+      }
+      lastConversionTimestamp = now;
+
       const label = link.getAttribute('aria-label') || link.innerText.trim() || 'Botão WhatsApp';
       if (typeof window.gtag === 'function') {
         window.gtag('event', 'generate_lead', {

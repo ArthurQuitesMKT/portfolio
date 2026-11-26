@@ -33,8 +33,7 @@
   <meta name="twitter:image" content="https://arthurquites.com.br/assets/img/profile/og-cover.jpg">
   <meta name="twitter:image:alt" content="Arthur Quites - Currículo Profissional">
 
-  <!-- Google Search Console: insira o token oficial fornecido pelo Search Console quando disponível -->
-  <!-- <meta name="google-site-verification" content="SEU_TOKEN_AQUI"> -->
+  <!-- Verificações Webmasters: insira os tokens oficiais quando validados no Search Console -->
 
   <!-- Dados Estruturados Schema.org (JSON-LD: ProfilePage, Person & BreadcrumbList) -->
   <script type="application/ld+json">
@@ -161,7 +160,7 @@
           <span>Imprimir / Salvar PDF</span>
         </button>
 
-        <a href="https://api.whatsapp.com/send/?phone=5531971454442&text=Ol%C3%A1%20Arthur%21%20Acessei%20seu%20curr%C3%ADculo%20e%20gostaria%20de%20conversar%20sobre%20uma%20oportunidade...&type=phone_number&app_absent=0" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#ff6b00] hover:bg-[#ff8533] text-[#090c10] font-bold text-xs font-bold tracking-wider uppercase shadow-sm hover:shadow-orange-500/20 transition-all">
+        <a href="https://api.whatsapp.com/send/?phone=5531971454442&text=Ol%C3%A1%20Arthur%21%20Acessei%20seu%20curr%C3%ADculo%20e%20gostaria%20de%20conversar%20sobre%20uma%20oportunidade..." target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#ff6b00] hover:bg-[#ff8533] text-[#090c10] font-bold text-xs font-bold tracking-wider uppercase shadow-sm hover:shadow-orange-500/20 transition-all">
           <i data-lucide="message-circle" class="w-3.5 h-3.5" aria-hidden="true"></i>
           <span>FALE COMIGO</span>
         </a>
@@ -174,7 +173,7 @@
   <main class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-12">
 
     <!-- CARTÃO HERO / PERFIL EXECUTIVO -->
-    <section class="print-card rounded-3xl bg-zinc-950/90 border border-zinc-800/90 backdrop-blur-md p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+    <section id="curriculo-hero" class="print-card rounded-3xl bg-zinc-950/90 border border-zinc-800/90 backdrop-blur-md p-6 sm:p-10 shadow-2xl relative overflow-hidden">
       <div class="absolute -top-24 -right-24 w-72 h-72 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
 
       <div class="flex flex-col md:flex-row items-center md:items-start gap-8 relative z-10">
@@ -219,7 +218,7 @@
               <i data-lucide="linkedin" class="w-3.5 h-3.5 text-[#0077b5]" aria-hidden="true"></i>
               <span>linkedin.com/in/arthur-quites</span>
             </a>
-            <a href="https://api.whatsapp.com/send/?phone=5531971454442&text=Ol%C3%A1%20Arthur%21%20Acessei%20seu%20curr%C3%ADculo...&type=phone_number&app_absent=0" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white transition-colors">
+            <a href="https://api.whatsapp.com/send/?phone=5531971454442&text=Ol%C3%A1%20Arthur%21%20Acessei%20seu%20curr%C3%ADculo..." target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white transition-colors">
               <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-400" aria-hidden="true"></i>
               <span>(31) 97145-4442</span>
             </a>
@@ -239,7 +238,7 @@
     </section>
 
     <!-- PAINEL DE IMPACTO & RESULTADOS AUDITADOS -->
-    <section class="space-y-4">
+    <section id="curriculo-kpis" class="space-y-4">
       <div class="flex items-center justify-between">
         <h2 class="font-display text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
           <span class="w-2 h-2 rounded-full bg-[#ff6b00]"></span>
@@ -272,7 +271,7 @@
     </section>
 
     <!-- TRAJETÓRIA & EXPERIÊNCIA PROFISSIONAL -->
-    <section class="space-y-6">
+    <section id="curriculo-experiencia" class="space-y-6">
       <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
         <h2 class="font-display text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
           <span class="w-2 h-2 rounded-full bg-[#ff6b00]"></span>
@@ -372,7 +371,7 @@
     </section>
 
     <!-- ARSENAL TÉCNICO & COMPETÊNCIAS DOMINADAS -->
-    <section class="space-y-6">
+    <section id="curriculo-arsenal" class="space-y-6">
       <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
         <h2 class="font-display text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
           <span class="w-2 h-2 rounded-full bg-[#ff6b00]"></span>
@@ -458,7 +457,7 @@
     </section>
 
     <!-- FORMAÇÃO ACADÊMICA -->
-    <section class="space-y-6">
+    <section id="curriculo-formacao" class="space-y-6">
       <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
         <h2 class="font-display text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
           <span class="w-2 h-2 rounded-full bg-[#ff6b00]"></span>
@@ -485,7 +484,7 @@
     </section>
 
     <!-- DIFERENCIAIS PROFISSIONAIS -->
-    <section class="print-card p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-zinc-900/90 to-zinc-950 border border-zinc-800/80 space-y-4">
+    <section id="curriculo-diferenciais" class="print-card p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-zinc-900/90 to-zinc-950 border border-zinc-800/80 space-y-4">
       <h3 class="font-display font-bold text-white text-lg flex items-center gap-2">
         <i data-lucide="sparkles" class="w-4 h-4 text-orange-400"></i>
         <span>Por que minha atuação gera resultados acima da média?</span>
@@ -521,7 +520,7 @@
       </p>
 
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-        <a href="https://api.whatsapp.com/send/?phone=5531971454442&text=Ol%C3%A1%20Arthur%21%20Gostaria%20de%20conversar%20sobre%20uma%20oportunidade%20para%20a%20minha%20empresa...&type=phone_number&app_absent=0" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#ff6b00] hover:bg-[#ff8533] text-[#090c10] font-bold text-xs sm:text-sm font-bold tracking-wider uppercase shadow-xl shadow-orange-500/25 hover:scale-105 transition-all cursor-pointer">
+        <a href="https://api.whatsapp.com/send/?phone=5531971454442&text=Ol%C3%A1%20Arthur%21%20Gostaria%20de%20conversar%20sobre%20uma%20oportunidade%20para%20a%20minha%20empresa..." target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#ff6b00] hover:bg-[#ff8533] text-[#090c10] font-bold text-xs sm:text-sm font-bold tracking-wider uppercase shadow-xl shadow-orange-500/25 hover:scale-105 transition-all cursor-pointer">
           <i data-lucide="message-circle" class="w-4 h-4" aria-hidden="true"></i>
           <span>FALE COMIGO NO WHATSAPP</span>
         </a>

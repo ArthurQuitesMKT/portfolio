@@ -137,6 +137,8 @@ test('Todos os links de WhatsApp em index.html e curriculo.html devem apontar pa
 
   assert.strictEqual(phoneNumbers.size, 1, `Múltiplos números de WhatsApp encontrados: ${Array.from(phoneNumbers).join(', ')}`);
   assert.ok(phoneNumbers.has('5531971454442'), 'Número canônico de WhatsApp deve ser 5531971454442');
+  assert.ok(!combined.includes('type=phone_number'), 'Encontrado parâmetro residual type=phone_number nos links de WhatsApp');
+  assert.ok(!combined.includes('app_absent='), 'Encontrado parâmetro residual app_absent nos links de WhatsApp');
 });
 
 // 9. Segurança de Repositório (Zero Tokens Expostos em .git/config)
@@ -161,6 +163,39 @@ test('index.html e sitemap.xml devem usar rotas canônicas limpas e app.js deve 
 
   const appJs = fs.readFileSync(path.join(ROOT_DIR, 'js', 'app.js'), 'utf8');
   assert.ok(appJs.includes('initWhatsAppConversionTracking'), 'Falta initWhatsAppConversionTracking em app.js');
+});
+
+// 11. Proteção de Métricas & Debounce na Telemetria
+test('app.js deve implementar debounce/cooldown contra cliques duplos na telemetria', () => {
+  const appJs = fs.readFileSync(path.join(ROOT_DIR, 'js', 'app.js'), 'utf8');
+  assert.ok(appJs.includes('CONVERSION_COOLDOWN_MS'), 'Falta CONVERSION_COOLDOWN_MS em app.js');
+  assert.ok(appJs.includes('lastConversionTimestamp'), 'Falta lastConversionTimestamp em app.js');
+});
+
+// 12. Unificação DRY de Feedback Visual (Toast Notification)
+test('shared-utils.js deve exportar showToastNotification e ser consumido em app.js e curriculo.js', () => {
+  const shared = fs.readFileSync(path.join(ROOT_DIR, 'js', 'shared-utils.js'), 'utf8');
+  assert.ok(shared.includes('showToastNotification'), 'Falta showToastNotification em shared-utils.js');
+  const appJs = fs.readFileSync(path.join(ROOT_DIR, 'js', 'app.js'), 'utf8');
+  assert.ok(appJs.includes('PortfolioUtils.showToastNotification'), 'app.js deve delegar para PortfolioUtils.showToastNotification');
+  const currJs = fs.readFileSync(path.join(ROOT_DIR, 'js', 'curriculo.js'), 'utf8');
+  assert.ok(currJs.includes('PortfolioUtils.showToastNotification'), 'curriculo.js deve delegar para PortfolioUtils.showToastNotification');
+});
+
+// 13. Política de Cache Seguro (Prevenção de Cache Stale / Imutável sem Hash)
+test('vercel.json e _headers devem aplicar política de cache seguro para scripts e estilos dinâmicos', () => {
+  const vercel = fs.readFileSync(path.join(ROOT_DIR, 'vercel.json'), 'utf8');
+  const headers = fs.readFileSync(path.join(ROOT_DIR, '_headers'), 'utf8');
+  assert.ok(!vercel.includes('"source": "/(assets|dist|js|css)/(.*)"'), 'vercel.json não deve agrupar js/css no mesmo grupo immutable de assets');
+  assert.ok(headers.includes('/js/*\r\n  Cache-Control: public, max-age=86400') || headers.includes('/js/*\n  Cache-Control: public, max-age=86400'), 'Falta política segura de cache para js em _headers');
+});
+
+// 14. Limpeza de Metadados e Placeholders de Produção
+test('index.html e curriculo.html NÃO devem conter placeholders SEU_TOKEN_AQUI', () => {
+  const indexHtml = fs.readFileSync(path.join(ROOT_DIR, 'index.html'), 'utf8');
+  const currHtml = fs.readFileSync(path.join(ROOT_DIR, 'curriculo.html'), 'utf8');
+  assert.ok(!indexHtml.includes('SEU_TOKEN_AQUI'), 'Encontrado SEU_TOKEN_AQUI em index.html');
+  assert.ok(!currHtml.includes('SEU_TOKEN_AQUI'), 'Encontrado SEU_TOKEN_AQUI em curriculo.html');
 });
 
 console.log('\n\x1b[32m✔ TODOS OS TESTES PASSARAM COM SUCESSO!\x1b[0m\n');

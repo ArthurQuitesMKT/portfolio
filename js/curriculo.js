@@ -35,6 +35,10 @@
 
   function showCurriculoToast(msg) {
     const toast = document.getElementById('toast-curriculo');
+    if (window.PortfolioUtils && typeof window.PortfolioUtils.showToastNotification === 'function') {
+      window.PortfolioUtils.showToastNotification(toast, msg, 3000);
+      return;
+    }
     if (!toast) return;
 
     if (msg) {

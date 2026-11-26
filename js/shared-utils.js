@@ -77,10 +77,30 @@
     }
   }
 
+  /**
+   * Utilitário Unificado de Feedback Visual: Toast Notification (DRY)
+   */
+  function showToastNotification(toastEl, message, duration = 3000) {
+    if (!toastEl) return;
+    if (message) {
+      const msgSpan = toastEl.querySelector('.toast-message, span:last-child');
+      if (msgSpan) msgSpan.textContent = message;
+    }
+    toastEl.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+    toastEl.classList.add('opacity-100', 'translate-y-0');
+
+    clearTimeout(toastEl._timer);
+    toastEl._timer = setTimeout(() => {
+      toastEl.classList.remove('opacity-100', 'translate-y-0');
+      toastEl.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+    }, duration);
+  }
+
   global.PortfolioUtils = {
     getContactEmail,
     escapeHTML,
     copyTextToClipboard,
-    trapFocusInContainer
+    trapFocusInContainer,
+    showToastNotification
   };
 })(window);
